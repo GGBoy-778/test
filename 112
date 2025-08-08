@@ -1,0 +1,97 @@
+using System;
+using System.Data.SQLite;
+using System.IO;
+using System.Windows.Forms;
+
+namespace BatteryDevice.AddAuthoUI
+{
+    public partial class MianFrm : Form
+    {
+        private static string conn = "Data Source = AuthorityTabel.db;Version=3;";
+
+        public MianFrm()
+        {
+            InitializeComponent();
+        }
+
+        private void btnExcute_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Tuple<bool, string> tuple = instAuto(txtKEY.Text.ToString());
+                if (tuple.Item1)
+                {
+                    MessageBox.Show(tuple.Item2, "提示", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
+                }
+                else
+                {
+                    MessageBox.Show(tuple.Item2, "提示", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "提示", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
+            }
+        }
+
+        private void btnAddAll_Click(object sender, EventArgs e)
+        {
+            string text = string.Empty;
+            try
+            {
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "文本文件 (*.txt)|*.txt";
+                openFileDialog.FilterIndex = 1;
+                openFileDialog.Multiselect = false;
+                openFileDialog.Title = "打开文本文件";
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    text = File.ReadAllText(openFileDialog.FileName);
+                    txtKEY.Text = text;
+                    string[] array = text.Split(new char[] { '#', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        Tuple<bool, string> tuple = instAuto(array[i]);
+                        if (!tuple.Item1)
+                        {
+                            MessageBox.Show(tuple.Item2, "提示", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
+                        }
+                    }
+                    MessageBox.Show("权限添加完成", "提示", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "提示", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
+            }
+        }
+
+        private void btnCreateGuid_Click(object sender, EventArgs e)
+        {
+            txtGuid.Text = Guid.NewGuid().ToString();
+        }
+
+        private static Tuple<bool, string> instAuto(string sql)
+        {
+            Tuple<bool, string> result = new Tuple<bool, string>(false, "权限添加失败");
+            try
+            {
+                using (SQLiteConnection val2 = new SQLiteConnection(conn))
+                using (SQLiteCommand val = new SQLiteCommand(sql))
+                {
+                    val2.Open();
+                    val.Connection = val2;
+                    if (val.ExecuteNonQuery() > 0)
+                    {
+                        result = new Tuple<bool, string>(true, "权限添加成功");
+                    }
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new Tuple<bool, string>(false, string.Format("已有此权限:{0}", ex.Message));
+            }
+        }
+    }
+}
