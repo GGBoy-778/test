@@ -1,1 +1,22 @@
-测试去额哇哇哇哇哇哇哇哇哇哇哇哇哇哇哇哇哇
+namespace CBTSExtensions
+{
+    /// <summary>
+    /// String 扩展
+    /// </summary>
+    public static class StringExtension
+    {
+        /// <summary>
+        /// 首字母小写
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static string ToLowerCamelCase(this string str)
+        {
+            var charArr = str.ToCharArray();
+
+            charArr[0] = char.ToLower(charArr[0]);
+
+            return new string(charArr);
+        }
+    }
+}
